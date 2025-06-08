@@ -1,0 +1,56 @@
+from docx import Document
+from docx.shared import Inches
+
+# Create a combined Word document
+combined_doc = Document()
+combined_doc.add_heading("Vietnam Economic Indicators: Correlation & Time Series Analysis (2000–2023)", level=1)
+
+# Intro
+combined_doc.add_paragraph(
+    "This report combines correlation and time series analysis for key economic indicators in Vietnam. "
+    "It focuses on the relationships between foreign direct investment (FDI), industrial development, governance quality, and GDP per capita."
+)
+
+# Add correlation graph
+combined_doc.add_heading("Correlation Analysis", level=2)
+combined_doc.add_picture("/mnt/data/vietnam_correlation_analysis.png", width=Inches(6.5))
+combined_doc.add_paragraph("The figure above shows two correlation plots: "
+                           "(1) Industry (% of GDP) vs. FDI (% of GDP), and "
+                           "(2) GDP per Capita vs. Control of Corruption. "
+                           "The strength and direction of the relationships are visually and statistically assessed.")
+
+# Correlation matrix
+combined_doc.add_heading("Correlation Matrix", level=3)
+correlation_matrix = df[["FDI_pct_GDP", "Industry_pct_GDP", "Control_of_Corruption", "GDP_per_capita"]].corr()
+
+table = combined_doc.add_table(rows=1, cols=5)
+table.style = 'Table Grid'
+hdr_cells = table.rows[0].cells
+hdr_cells[0].text = ''
+hdr_cells[1].text = 'FDI % GDP'
+hdr_cells[2].text = 'Industry % GDP'
+hdr_cells[3].text = 'Corruption (WGI)'
+hdr_cells[4].text = 'GDP per Capita'
+
+for row_name in correlation_matrix.index:
+    row = table.add_row().cells
+    row[0].text = row_name
+    row[1].text = f"{correlation_matrix.loc[row_name, 'FDI_pct_GDP']:.2f}"
+    row[2].text = f"{correlation_matrix.loc[row_name, 'Industry_pct_GDP']:.2f}"
+    row[3].text = f"{correlation_matrix.loc[row_name, 'Control_of_Corruption']:.2f}"
+    row[4].text = f"{correlation_matrix.loc[row_name, 'GDP_per_capita']:.2f}"
+
+# Time Series section
+combined_doc.add_heading("Time Series Analysis", level=2)
+combined_doc.add_picture("/mnt/data/vietnam_time_series_indicators.png", width=Inches(6.5))
+combined_doc.add_paragraph(
+    "This time series plot presents year-by-year trends of four major indicators: "
+    "FDI (% of GDP), Industry (% of GDP), Control of Corruption (WGI), and GDP per Capita (USD). "
+    "The charts highlight the evolving structure and performance of Vietnam’s economy over two decades."
+)
+
+# Save the combined document
+combined_doc_path = "/mnt/data/Vietnam_Economic_Correlation_and_Time_Series.docx"
+combined_doc.save(combined_doc_path)
+
+combined_doc_path
