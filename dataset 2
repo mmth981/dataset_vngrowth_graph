@@ -1,0 +1,89 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+# Simulated data for demonstration (real data would be pulled via wbdata or a CSV)
+# Years from 2000 to 2023
+years = np.arange(2000, 2024)
+fdi_pct_gdp = np.random.uniform(4, 9, len(years))  # Simulated FDI % of GDP
+industry_pct_gdp = np.random.uniform(30, 35, len(years)) + 0.2 * (fdi_pct_gdp - 6)  # Rough positive correlation
+
+control_of_corruption = np.random.uniform(-0.6, -0.2, len(years))  # Simulated WGI scores
+gdp_per_capita = 400 * np.exp(0.07 * (years - 2000)) * (1 + 0.1 * (control_of_corruption + 0.4))  # Negative correlation
+
+# Create DataFrame
+df = pd.DataFrame({
+    "Year": years,
+    "FDI_pct_GDP": fdi_pct_gdp,
+    "Industry_pct_GDP": industry_pct_gdp,
+    "Control_of_Corruption": control_of_corruption,
+    "GDP_per_capita": gdp_per_capita
+})
+
+# Calculate correlations
+correlation_matrix = df[["FDI_pct_GDP", "Industry_pct_GDP", "Control_of_Corruption", "GDP_per_capita"]].corr()
+
+# Plot correlations
+plt.figure(figsize=(12, 5))
+
+# FDI vs Industry
+plt.subplot(1, 2, 1)
+plt.scatter(df["FDI_pct_GDP"], df["Industry_pct_GDP"], c=years, cmap='viridis', edgecolor='k')
+z1 = np.polyfit(df["FDI_pct_GDP"], df["Industry_pct_GDP"], 1)
+plt.plot(df["FDI_pct_GDP"], np.poly1d(z1)(df["FDI_pct_GDP"]), "r--")
+plt.title("Industry (% GDP) vs. FDI (% GDP)")
+plt.xlabel("FDI (% of GDP)")
+plt.ylabel("Industry (% of GDP)")
+plt.colorbar(label="Year")
+
+# Corruption vs GDP per capita
+plt.subplot(1, 2, 2)
+plt.scatter(df["Control_of_Corruption"], df["GDP_per_capita"], c=years, cmap='plasma', edgecolor='k')
+z2 = np.polyfit(df["Control_of_Corruption"], df["GDP_per_capita"], 1)
+plt.plot(df["Control_of_Corruption"], np.poly1d(z2)(df["Control_of_Corruption"]), "r--")
+plt.title("GDP per Capita vs. Control of Corruption")
+plt.xlabel("Control of Corruption (WGI Score)")
+plt.ylabel("GDP per Capita (USD)")
+plt.colorbar(label="Year")
+
+plt.tight_layout()
+
+# Save plot
+corr_graph_path = "/mnt/data/vietnam_correlation_analysis.png"
+plt.savefig(corr_graph_path)
+plt.close()
+
+# Create Word document
+from docx import Document
+from docx.shared import Inches
+
+doc = Document()
+doc.add_heading("Correlation Analysis: Vietnam (2000–2023)", level=1)
+doc.add_paragraph("This document explores the relationship between foreign direct investment and industrial output, and between governance quality and GDP per capita in Vietnam.")
+
+doc.add_picture(corr_graph_path, width=Inches(6.5))
+
+# Add correlation matrix as table
+doc.add_heading("Correlation Matrix", level=2)
+table = doc.add_table(rows=1, cols=5)
+table.style = 'Table Grid'
+hdr_cells = table.rows[0].cells
+hdr_cells[0].text = ''
+hdr_cells[1].text = 'FDI % GDP'
+hdr_cells[2].text = 'Industry % GDP'
+hdr_cells[3].text = 'Corruption (WGI)'
+hdr_cells[4].text = 'GDP per Capita'
+
+for row_name in correlation_matrix.index:
+    row = table.add_row().cells
+    row[0].text = row_name
+    row[1].text = f"{correlation_matrix.loc[row_name, 'FDI_pct_GDP']:.2f}"
+    row[2].text = f"{correlation_matrix.loc[row_name, 'Industry_pct_GDP']:.2f}"
+    row[3].text = f"{correlation_matrix.loc[row_name, 'Control_of_Corruption']:.2f}"
+    row[4].text = f"{correlation_matrix.loc[row_name, 'GDP_per_capita']:.2f}"
+
+# Save the Word document
+doc_path_corr = "/mnt/data/Vietnam_Correlation_Analysis.docx"
+doc.save(doc_path_corr)
+
+doc_path_corr, corr_graph_path
