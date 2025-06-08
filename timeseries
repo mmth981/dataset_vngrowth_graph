@@ -1,0 +1,52 @@
+# Plotting time series for the four key indicators
+plt.figure(figsize=(12, 8))
+
+# FDI % of GDP
+plt.subplot(2, 2, 1)
+plt.plot(df["Year"], df["FDI_pct_GDP"], marker='o', color='teal')
+plt.title("FDI (% of GDP)")
+plt.xlabel("Year")
+plt.ylabel("FDI (% of GDP)")
+plt.grid(True)
+
+# Industry % of GDP
+plt.subplot(2, 2, 2)
+plt.plot(df["Year"], df["Industry_pct_GDP"], marker='o', color='navy')
+plt.title("Industry (% of GDP)")
+plt.xlabel("Year")
+plt.ylabel("Industry (% of GDP)")
+plt.grid(True)
+
+# Control of Corruption
+plt.subplot(2, 2, 3)
+plt.plot(df["Year"], df["Control_of_Corruption"], marker='o', color='maroon')
+plt.title("Control of Corruption (WGI Score)")
+plt.xlabel("Year")
+plt.ylabel("WGI Score")
+plt.grid(True)
+
+# GDP per Capita
+plt.subplot(2, 2, 4)
+plt.plot(df["Year"], df["GDP_per_capita"], marker='o', color='darkgreen')
+plt.title("GDP per Capita (USD)")
+plt.xlabel("Year")
+plt.ylabel("USD")
+plt.grid(True)
+
+plt.tight_layout()
+time_series_path = "/mnt/data/vietnam_time_series_indicators.png"
+plt.savefig(time_series_path)
+plt.close()
+
+# Export to Word document
+doc_ts = Document()
+doc_ts.add_heading("Vietnam Economic Indicators Time Series (2000–2023)", level=1)
+doc_ts.add_paragraph("This document presents the time series trends for four key economic indicators in Vietnam from 2000 to 2023: FDI (% of GDP), Industry (% of GDP), Control of Corruption (WGI), and GDP per Capita (USD).")
+
+doc_ts.add_picture(time_series_path, width=Inches(6.5))
+
+# Save document
+doc_path_ts = "/mnt/data/Vietnam_Time_Series_Indicators.docx"
+doc_ts.save(doc_path_ts)
+
+doc_path_ts, time_series_path
